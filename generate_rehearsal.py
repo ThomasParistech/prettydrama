@@ -575,6 +575,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                     <input type="checkbox" id="hide-text-checkbox">
                     <span>Masquer</span>
                 </label>
+                <label class="hide-text-toggle">
+                    <input type="checkbox" id="beep-checkbox">
+                    <span>Bip</span>
+                </label>
             </div>
         </div>
     </header>
@@ -620,9 +624,12 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         let isPlaying = false;
         let rehearseCharacter = "";
         let hideRehearsalText = false;
+        let beepEnabled = false;
+        let audioContext = null;
 
         const actSelect = document.getElementById("act-select");
         const hideTextCheckbox = document.getElementById("hide-text-checkbox");
+        const beepCheckbox = document.getElementById("beep-checkbox");
         const sceneSelect = document.getElementById("scene-select");
         const characterSelect = document.getElementById("character-select");
         const dialogueContainer = document.getElementById("dialogue-container");
@@ -685,6 +692,13 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             hideTextCheckbox.addEventListener("change", () => {
                 hideRehearsalText = hideTextCheckbox.checked;
                 renderScene();
+            });
+
+            beepCheckbox.addEventListener("change", () => {
+                beepEnabled = beepCheckbox.checked;
+                if (beepEnabled && !audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
             });
 
             playBtn.addEventListener("click", togglePlay);
@@ -825,6 +839,20 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         const playIconSvg = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
         const pauseIconSvg = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
 
+        function playBeep() {
+            if (!beepEnabled || !audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 880;
+            oscillator.type = "sine";
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
         function togglePlay() {
             if (isPlaying) {
                 stop();
@@ -856,6 +884,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 // Show wait indicator and wait for user to tap next or timeout
                 waitIndicator.classList.add("visible");
                 statusBar.textContent = `À vous : ${dialogue.character}`;
+                playBeep();
 
                 // Auto-advance after a pause (3 seconds per line of text, min 3s)
                 const waitTime = Math.max(3000, dialogue.text.length * 80);
