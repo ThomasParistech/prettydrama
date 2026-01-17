@@ -1,0 +1,57 @@
+==========Act==========
+***Scene***
+<thomas> Un deux
+<python> trois !!
+<test> Quatre cinq six sept.
+bonjour
+<python> Huit neuf DIX... Onze
+<thomas> Douze
+
+***Scene***
+<python> Éclair tonnerre !
+<thomas> Pomme banane
+je suis là
+<test> Zèbre kangourou lion tigre.
+nouvelle ligne
+encore
+<python> Écho Foxtrot Golf… Hôtel
+
+***Scene***
+<test> Crêpe gaufre sirop
+<python> Clair de lune ! Brillance d’étoile !
+<thomas> Fusée vaisseau spatial
+<python> Éclair encore !
+<thomas> Jupiter
+
+==========Act==========
+***Scene***
+<thomas> Café thé
+<python> Nuage arc-en-ciel soleil
+<test> Crayon papier gomme
+
+
+==========Act==========
+***Scene***
+<python> Code binaire ! Algorithme !
+<test> Fourchette cuillère couteau assiette
+<thomas> Cercle carré triangle
+<python> Océan rivière lac étang
+<thomas> Désert
+
+***Scene***
+<test> Tasse bol assiette mug
+<python> Mélodie harmonie rythme
+<thomas> Guitare batterie piano
+<python> Coucher de soleil lever du soleil crépuscule aube
+
+***Scene***
+<python> Flux quantique !
+<test> Beignet gelée muffin
+<thomas> Cornet de glace
+<thomas> Fraise
+
+***Scene***
+<thomas> Montagne vallée colline
+<python> Orage ! Éclair !
+<test> Carnet stylo crayon
+<python> Goutte de pluie flocon de neige vent
