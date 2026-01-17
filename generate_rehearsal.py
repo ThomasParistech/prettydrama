@@ -583,7 +583,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
     <div class="wait-indicator" id="wait-indicator">
         <div class="wait-indicator-text">À vous...</div>
-        <div class="wait-indicator-sub">Appuyez sur suivant</div>
     </div>
 
     <div class="controls">
