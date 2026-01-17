@@ -34,21 +34,26 @@ class Act:
 @dataclass
 class Drama:
     """The complete play, containing a sequence of Acts."""
+    title: str
     acts: list[Act]
 
     @staticmethod
     def from_file(drama_txt: str) -> 'Drama':
         """Load a Drama from a text file."""
-
         with open(drama_txt, "r") as file:
             lines = [line.strip() for line in file]
             return Drama.from_lines(lines)
 
     @staticmethod
     def from_lines(lines: list[str]) -> 'Drama':
-        """Load a Drama from text lines."""
-        return Drama(acts=[Act.from_lines(act_lines)
-                           for act_lines in split_lines_into_blocks(lines, "=act=")])
+        """Load a Drama from text lines. First line is title."""
+        title = lines[0] if lines else ""
+        remaining = lines[1:]
+        return Drama(
+            title=title,
+            acts=[Act.from_lines(act_lines)
+                  for act_lines in split_lines_into_blocks(remaining, "=act=")]
+        )
 
     def print(self) -> None:
         """Print the Drama structure."""

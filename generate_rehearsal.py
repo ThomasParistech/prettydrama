@@ -31,6 +31,7 @@ def generate_drama_data(drama: Drama, tts_dir: str) -> dict:
         acts_data.append({"scenes": scenes_data})
 
     return {
+        "title": drama.title,
         "characters": sorted(characters),
         "acts": acts_data
     }
@@ -82,21 +83,31 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             box-shadow: 0 2px 8px rgba(45, 41, 38, 0.06);
         }
 
-        .header-toggle {
-            padding: 8px 16px;
-            text-align: center;
-            cursor: pointer;
-            color: var(--text-light);
-            font-size: 0.75rem;
+        .header-title-bar {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        .title-text {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .header-toggle {
+            color: var(--text-light);
+            margin-left: 6px;
+            display: flex;
+            align-items: center;
         }
 
         .header-toggle svg {
-            width: 12px;
-            height: 12px;
+            width: 20px;
+            height: 20px;
             fill: currentColor;
             transition: transform 0.2s ease;
         }
@@ -487,9 +498,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 </head>
 <body>
     <header id="header">
-        <div class="header-toggle" id="header-toggle">
-            <span>Options</span>
-            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+        <div class="header-title-bar">
+            <span class="title-text" id="title-text"></span>
+            <div class="header-toggle" id="header-toggle">
+                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </div>
         </div>
         <div class="header-content">
             <div class="nav-row">
@@ -536,11 +549,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 <button class="control-btn" id="next-btn" aria-label="Next">
                     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </button>
-                <button class="control-btn" id="loop-btn" aria-label="Loop">
-                    <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-                </button>
             </div>
-            <div class="loop-indicator" id="loop-indicator">Boucle désactivée</div>
         </div>
     </div>
 
@@ -553,7 +562,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         let currentSceneIndex = 0;
         let currentDialogueIndex = 0;
         let isPlaying = false;
-        let isLooping = false;
         let rehearseCharacter = "";
 
         const actSelect = document.getElementById("act-select");
@@ -564,17 +572,17 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         const playBtn = document.getElementById("play-btn");
         const prevBtn = document.getElementById("prev-btn");
         const nextBtn = document.getElementById("next-btn");
-        const loopBtn = document.getElementById("loop-btn");
         const progressFill = document.getElementById("progress-fill");
-        const loopIndicator = document.getElementById("loop-indicator");
-        const statusBar = document.getElementById("status-bar");
         const waitIndicator = document.getElementById("wait-indicator");
 
         function init() {
-            // Header toggle
+            // Set title
+            document.getElementById("title-text").textContent = DRAMA_DATA.title;
+
+            // Header toggle (click on title bar)
             const header = document.getElementById("header");
-            const headerToggle = document.getElementById("header-toggle");
-            headerToggle.addEventListener("click", () => {
+            const headerTitleBar = document.querySelector(".header-title-bar");
+            headerTitleBar.addEventListener("click", () => {
                 header.classList.toggle("expanded");
             });
 
@@ -618,7 +626,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             playBtn.addEventListener("click", togglePlay);
             prevBtn.addEventListener("click", prevDialogue);
             nextBtn.addEventListener("click", nextDialogue);
-            loopBtn.addEventListener("click", toggleLoop);
 
             // Progress bar click to seek
             const progressContainer = document.querySelector(".progress-container");
@@ -760,14 +767,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             currentDialogueIndex++;
 
             if (currentDialogueIndex >= scene.dialogues.length) {
-                if (isLooping) {
-                    currentDialogueIndex = 0;
-                    playCurrentDialogue();
-                } else {
-                    currentDialogueIndex = scene.dialogues.length - 1;
-                    stop();
-                    statusBar.textContent = "Scène terminée";
-                }
+                currentDialogueIndex = scene.dialogues.length - 1;
+                stop();
             } else {
                 playCurrentDialogue();
             }
@@ -788,19 +789,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 highlightCurrent();
                 if (isPlaying) playCurrentDialogue();
                 else updateStatus();
-            } else if (isLooping) {
-                currentDialogueIndex = 0;
-                highlightCurrent();
-                if (isPlaying) playCurrentDialogue();
-                else updateStatus();
             }
-        }
-
-        function toggleLoop() {
-            isLooping = !isLooping;
-            loopBtn.classList.toggle("active", isLooping);
-            loopIndicator.textContent = isLooping ? "Boucle activée" : "Boucle désactivée";
-            loopIndicator.classList.toggle("active", isLooping);
         }
 
         function seekFromProgressBar(e) {
