@@ -572,11 +572,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                     </select>
                 </div>
                 <label class="hide-text-toggle">
-                    <input type="checkbox" id="hide-text-checkbox">
+                    <input type="checkbox" id="hide-text-checkbox" checked>
                     <span>Masquer</span>
                 </label>
                 <label class="hide-text-toggle">
-                    <input type="checkbox" id="beep-checkbox">
+                    <input type="checkbox" id="beep-checkbox" checked>
                     <span>Bip</span>
                 </label>
             </div>
@@ -623,8 +623,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         let currentDialogueIndex = 0;
         let isPlaying = false;
         let rehearseCharacter = "";
-        let hideRehearsalText = false;
-        let beepEnabled = false;
+        let hideRehearsalText = true;
+        let beepEnabled = true;
         let audioContext = null;
 
         const actSelect = document.getElementById("act-select");
@@ -857,6 +857,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             if (isPlaying) {
                 stop();
             } else {
+                // Initialize audio context on first play (required for mobile)
+                if (!audioContext && beepEnabled) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
                 isPlaying = true;
                 playBtn.innerHTML = pauseIconSvg;
                 playCurrentDialogue();
