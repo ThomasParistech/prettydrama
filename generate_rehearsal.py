@@ -7,7 +7,7 @@ from drama import Drama
 
 DRAMA_FILE = "full_drama.txt"
 TTS_OUTPUT_DIR = "tts-output"
-OUTPUT_HTML = "rehearsal.html"
+OUTPUT_HTML = "index.html"
 
 
 def generate_drama_data(drama: Drama, tts_dir: str) -> dict:
