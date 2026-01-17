@@ -309,29 +309,55 @@
 
         .progress-container {
             margin-bottom: 8px;
-            padding: 4px 0;
+            padding: 8px 0;
             cursor: pointer;
+            touch-action: none;
         }
 
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 4px;
             background: var(--bg-warm);
-            border-radius: 6px;
-            overflow: hidden;
+            border-radius: 4px;
             position: relative;
+            transition: height 0.1s ease;
         }
 
-        .progress-bar:hover {
-            height: 8px;
+        .progress-container:hover .progress-bar,
+        .progress-container.dragging .progress-bar {
+            height: 6px;
         }
 
         .progress-fill {
             height: 100%;
             background: var(--accent);
-            border-radius: 6px;
-            transition: width 0.15s ease;
+            border-radius: 4px;
+            position: relative;
             pointer-events: none;
+        }
+
+        .progress-thumb {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.1s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .progress-container:hover .progress-thumb,
+        .progress-container.dragging .progress-thumb {
+            opacity: 1;
+        }
+
+        .progress-container:active .progress-thumb,
+        .progress-container.dragging .progress-thumb {
+            transform: translateY(-50%) scale(1.2);
         }
 
         .status-bar {
@@ -494,9 +520,11 @@
 
     <div class="controls">
         <div class="controls-inner">
-            <div class="progress-container">
+            <div class="progress-container" id="progress-container">
                 <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
+                    <div class="progress-fill" id="progress-fill">
+                        <div class="progress-thumb"></div>
+                    </div>
                 </div>
             </div>
             <div class="status-bar" id="status-bar">Prêt</div>
@@ -534,6 +562,7 @@
         const prevBtn = document.getElementById("prev-btn");
         const nextBtn = document.getElementById("next-btn");
         const progressFill = document.getElementById("progress-fill");
+        const statusBar = document.getElementById("status-bar");
         const waitIndicator = document.getElementById("wait-indicator");
 
         function init() {
@@ -588,9 +617,64 @@
             prevBtn.addEventListener("click", prevDialogue);
             nextBtn.addEventListener("click", nextDialogue);
 
-            // Progress bar click to seek
-            const progressContainer = document.querySelector(".progress-container");
-            progressContainer.addEventListener("click", seekFromProgressBar);
+            // Progress bar drag to seek (handles both click and drag)
+            const progressContainer = document.getElementById("progress-container");
+
+            let isDragging = false;
+            let wasPlayingBeforeDrag = false;
+
+            const startDrag = (e) => {
+                e.preventDefault();
+                isDragging = true;
+                wasPlayingBeforeDrag = isPlaying;
+                if (isPlaying) {
+                    audioPlayer.pause();
+                }
+                progressContainer.classList.add("dragging");
+                updateSeekPosition(e);
+            };
+
+            const moveDrag = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                updateSeekPosition(e);
+            };
+
+            const endDrag = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                progressContainer.classList.remove("dragging");
+                if (wasPlayingBeforeDrag) {
+                    playCurrentDialogue();
+                }
+            };
+
+            const updateSeekPosition = (e) => {
+                const rect = progressContainer.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+                const percentage = x / rect.width;
+
+                const scene = getCurrentScene();
+                const total = scene.dialogues.length;
+                const newIndex = Math.floor(percentage * total);
+
+                currentDialogueIndex = Math.max(0, Math.min(newIndex, total - 1));
+                waitIndicator.classList.remove("visible");
+                highlightCurrent();
+                updateProgress();
+                updateStatus();
+            };
+
+            // Mouse events
+            progressContainer.addEventListener("mousedown", startDrag);
+            document.addEventListener("mousemove", moveDrag);
+            document.addEventListener("mouseup", endDrag);
+
+            // Touch events
+            progressContainer.addEventListener("touchstart", startDrag, { passive: false });
+            document.addEventListener("touchmove", moveDrag, { passive: false });
+            document.addEventListener("touchend", endDrag);
 
             audioPlayer.addEventListener("ended", onAudioEnded);
             audioPlayer.addEventListener("timeupdate", updateProgress);
