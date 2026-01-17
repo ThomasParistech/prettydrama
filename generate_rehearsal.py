@@ -230,6 +230,31 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             border-color: var(--accent);
         }
 
+        .hide-text-toggle {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .hide-text-toggle input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .hide-text-toggle span {
+            font-size: 0.75rem;
+            color: var(--text-medium);
+        }
+
+        .dialogue-card.muted.hide-text .dialogue-text {
+            filter: blur(8px);
+            user-select: none;
+        }
+
         .dialogue-container {
             padding: 20px;
         }
@@ -546,6 +571,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                         <option value="">Écoute seule</option>
                     </select>
                 </div>
+                <label class="hide-text-toggle">
+                    <input type="checkbox" id="hide-text-checkbox">
+                    <span>Masquer</span>
+                </label>
             </div>
         </div>
     </header>
@@ -591,8 +620,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         let currentDialogueIndex = 0;
         let isPlaying = false;
         let rehearseCharacter = "";
+        let hideRehearsalText = false;
 
         const actSelect = document.getElementById("act-select");
+        const hideTextCheckbox = document.getElementById("hide-text-checkbox");
         const sceneSelect = document.getElementById("scene-select");
         const characterSelect = document.getElementById("character-select");
         const dialogueContainer = document.getElementById("dialogue-container");
@@ -649,6 +680,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
             characterSelect.addEventListener("change", () => {
                 rehearseCharacter = characterSelect.value;
+                renderScene();
+            });
+
+            hideTextCheckbox.addEventListener("change", () => {
+                hideRehearsalText = hideTextCheckbox.checked;
                 renderScene();
             });
 
@@ -748,7 +784,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 card.dataset.index = i;
 
                 const isMuted = d.character.toLowerCase() === rehearseCharacter.toLowerCase();
-                if (isMuted) card.classList.add("muted");
+                if (isMuted) {
+                    card.classList.add("muted");
+                    if (hideRehearsalText) card.classList.add("hide-text");
+                }
 
                 const charEl = document.createElement("div");
                 charEl.className = "character-name";
