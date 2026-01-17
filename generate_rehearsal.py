@@ -70,12 +70,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             background: var(--bg-page);
             color: var(--text-dark);
             min-height: 100vh;
-            padding-bottom: 180px;
+            padding-bottom: 130px;
         }
 
         header {
             background: var(--bg-card);
-            padding: 24px 20px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -83,9 +82,43 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             box-shadow: 0 2px 8px rgba(45, 41, 38, 0.06);
         }
 
-        .header-title {
+        .header-toggle {
+            padding: 8px 16px;
             text-align: center;
-            margin-bottom: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .header-toggle svg {
+            width: 12px;
+            height: 12px;
+            fill: currentColor;
+            transition: transform 0.2s ease;
+        }
+
+        header.expanded .header-toggle svg {
+            transform: rotate(180deg);
+        }
+
+        .header-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 16px;
+        }
+
+        header.expanded .header-content {
+            max-height: 200px;
+            padding: 0 16px 12px;
+        }
+
+        .header-title {
+            display: none;
         }
 
         h1 {
@@ -105,8 +138,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
         .nav-row {
             display: flex;
-            gap: 12px;
-            margin-bottom: 14px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .select-wrapper {
@@ -130,14 +163,14 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
         .nav-row select, .rehearse-section select {
             width: 100%;
-            padding: 12px 16px;
-            padding-right: 36px;
-            border-radius: 10px;
+            padding: 8px 12px;
+            padding-right: 30px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--bg-page);
             color: var(--text-dark);
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 500;
             appearance: none;
             cursor: pointer;
@@ -147,22 +180,22 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         .nav-row select:focus, .rehearse-section select:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-light);
+            box-shadow: 0 0 0 2px var(--accent-light);
         }
 
         .rehearse-section {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
+            gap: 10px;
+            padding: 8px 12px;
             background: var(--bg-warm);
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
         .rehearse-section label {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1rem;
-            font-style: italic;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
             color: var(--text-medium);
             white-space: nowrap;
         }
@@ -291,20 +324,20 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             left: 0;
             right: 0;
             background: linear-gradient(to top, var(--bg-page) 80%, transparent);
-            padding: 28px 20px 24px;
+            padding: 16px 12px 12px;
         }
 
         .controls-inner {
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 16px 20px 20px;
+            border-radius: 12px;
+            padding: 10px 16px 12px;
             border: 1px solid var(--border);
             box-shadow: 0 -4px 20px rgba(45, 41, 38, 0.08);
         }
 
         .progress-container {
-            margin-bottom: 14px;
-            padding: 8px 0;
+            margin-bottom: 8px;
+            padding: 4px 0;
             cursor: pointer;
         }
 
@@ -330,27 +363,22 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
 
         .status-bar {
-            text-align: center;
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 0.9rem;
-            font-style: italic;
-            color: var(--text-light);
-            margin-bottom: 14px;
+            display: none;
         }
 
         .control-buttons {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .control-btn {
             background: var(--bg-warm);
             border: 1px solid var(--border);
             color: var(--text-medium);
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -370,18 +398,18 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
 
         .control-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             fill: currentColor;
         }
 
         .control-btn.play-btn {
-            width: 60px;
-            height: 60px;
+            width: 48px;
+            height: 48px;
             background: var(--accent);
             border: none;
             color: white;
-            box-shadow: 0 3px 10px rgba(196, 92, 62, 0.25);
+            box-shadow: 0 2px 8px rgba(196, 92, 62, 0.25);
         }
 
         .control-btn.play-btn:hover {
@@ -390,8 +418,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
 
         .control-btn.play-btn svg {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
         }
 
         .control-btn.active {
@@ -401,16 +429,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
 
         .loop-indicator {
-            text-align: center;
-            margin-top: 12px;
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 0.85rem;
-            font-style: italic;
-            color: var(--text-light);
-        }
-
-        .loop-indicator.active {
-            color: var(--accent);
+            display: none;
         }
 
         .wait-indicator {
@@ -467,25 +486,27 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-title">
-            <h1>Répétition</h1>
-            <div class="subtitle">Méthode à l'italienne</div>
+    <header id="header">
+        <div class="header-toggle" id="header-toggle">
+            <span>Options</span>
+            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
         </div>
-        <div class="nav-row">
-            <div class="select-wrapper">
-                <select id="act-select"></select>
+        <div class="header-content">
+            <div class="nav-row">
+                <div class="select-wrapper">
+                    <select id="act-select"></select>
+                </div>
+                <div class="select-wrapper">
+                    <select id="scene-select"></select>
+                </div>
             </div>
-            <div class="select-wrapper">
-                <select id="scene-select"></select>
-            </div>
-        </div>
-        <div class="rehearse-section">
-            <label>Je joue</label>
-            <div class="select-wrapper">
-                <select id="character-select">
-                    <option value="">Écoute seule</option>
-                </select>
+            <div class="rehearse-section">
+                <label>Je joue</label>
+                <div class="select-wrapper">
+                    <select id="character-select">
+                        <option value="">Écoute seule</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
@@ -550,6 +571,13 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         const waitIndicator = document.getElementById("wait-indicator");
 
         function init() {
+            // Header toggle
+            const header = document.getElementById("header");
+            const headerToggle = document.getElementById("header-toggle");
+            headerToggle.addEventListener("click", () => {
+                header.classList.toggle("expanded");
+            });
+
             // Populate act selector
             DRAMA_DATA.acts.forEach((_, i) => {
                 const opt = document.createElement("option");
