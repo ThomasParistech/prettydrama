@@ -2,7 +2,6 @@
 """Generate a mobile-friendly rehearsal webpage from drama data."""
 
 import json
-import os
 from drama import Drama
 
 DRAMA_FILE = "full_drama.txt"
@@ -126,25 +125,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         header.expanded .header-content {
             max-height: 200px;
             padding: 0 16px 12px;
-        }
-
-        .header-title {
-            display: none;
-        }
-
-        h1 {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 4px;
-        }
-
-        .subtitle {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 0.95rem;
-            font-style: italic;
-            color: var(--text-light);
         }
 
         .nav-row {
@@ -341,19 +321,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             color: var(--text-medium);
         }
 
-        .your-line-badge {
-            display: none;
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 0.85rem;
-            font-style: italic;
-            color: var(--accent);
-            margin-bottom: 6px;
-        }
-
-        .dialogue-card.muted .your-line-badge {
-            display: block;
-        }
-
         .controls {
             position: fixed;
             bottom: 0;
@@ -523,10 +490,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             fill: currentColor;
         }
 
-        .loop-indicator {
-            display: none;
-        }
-
         .wait-indicator {
             display: none;
             position: fixed;
@@ -554,13 +517,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             color: var(--accent);
         }
 
-        .wait-indicator-sub {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-top: 10px;
-        }
-
         @keyframes gentle-appear {
             from {
                 opacity: 0;
@@ -570,13 +526,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 opacity: 1;
                 transform: translate(-50%, -50%);
             }
-        }
-
-        .scene-divider {
-            text-align: center;
-            padding: 10px 0;
-            color: var(--text-light);
-            font-size: 0.8rem;
         }
     </style>
 </head>
@@ -845,7 +794,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             dialogueContainer.innerHTML = "";
 
             // Count user's lines for numbering
-            let userLineCount = 0;
             const userLineIndices = [];
             scene.dialogues.forEach((d, i) => {
                 if (d.character.toLowerCase() === rehearseCharacter.toLowerCase()) {
@@ -1034,6 +982,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
 
         function prevDialogue() {
+            waitIndicator.classList.remove("visible");
             currentDialogueIndex = Math.max(0, currentDialogueIndex - 1);
             highlightCurrent();
             if (isPlaying) playCurrentDialogue();
@@ -1048,27 +997,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 highlightCurrent();
                 if (isPlaying) playCurrentDialogue();
                 else updateStatus();
-            }
-        }
-
-        function seekFromProgressBar(e) {
-            const scene = getCurrentScene();
-            const total = scene.dialogues.length;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const percentage = clickX / rect.width;
-            const newIndex = Math.floor(percentage * total);
-
-            currentDialogueIndex = Math.max(0, Math.min(newIndex, total - 1));
-            waitIndicator.classList.remove("visible");
-            highlightCurrent();
-            updateProgress();
-
-            if (isPlaying) {
-                audioPlayer.pause();
-                playCurrentDialogue();
-            } else {
-                updateStatus();
             }
         }
 
