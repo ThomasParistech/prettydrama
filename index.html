@@ -690,6 +690,7 @@
                 rehearseCharacter = characterSelect.value;
                 prevMyLineBtn.classList.toggle("visible", rehearseCharacter !== "");
                 nextMyLineBtn.classList.toggle("visible", rehearseCharacter !== "");
+                updateSceneSelect();
                 renderScene();
             });
 
@@ -780,10 +781,17 @@
         function updateSceneSelect() {
             sceneSelect.innerHTML = "";
             const act = DRAMA_DATA.acts[currentActIndex];
-            act.scenes.forEach((_, i) => {
+            act.scenes.forEach((scene, i) => {
                 const opt = document.createElement("option");
                 opt.value = i;
-                opt.textContent = `Scène ${i + 1}`;
+                let label = `Scène ${i + 1}`;
+                if (rehearseCharacter) {
+                    const count = scene.dialogues.filter(d =>
+                        d.character.toLowerCase() === rehearseCharacter.toLowerCase()
+                    ).length;
+                    if (count > 0) label += ` (${count} réplique${count > 1 ? 's' : ''})`;
+                }
+                opt.textContent = label;
                 sceneSelect.appendChild(opt);
             });
             sceneSelect.value = currentSceneIndex;
