@@ -533,7 +533,7 @@
                     </select>
                 </div>
                 <label class="hide-text-toggle">
-                    <input type="checkbox" id="hide-text-checkbox" checked>
+                    <input type="checkbox" id="hide-text-checkbox">
                     <span>Masquer</span>
                 </label>
                 <label class="hide-text-toggle">
@@ -590,7 +590,7 @@
         let currentDialogueIndex = 0;
         let isPlaying = false;
         let rehearseCharacter = "";
-        let hideRehearsalText = true;
+        let hideRehearsalText = false;
         let beepEnabled = true;
         let audioContext = null;
 
@@ -855,7 +855,7 @@
 
             const isMuted = dialogue.character.toLowerCase() === rehearseCharacter.toLowerCase();
 
-            if (isMuted) {
+            if (isMuted && hideRehearsalText) {
                 // Show wait indicator and wait for user to tap next or timeout
                 waitIndicator.classList.add("visible");
                 statusBar.textContent = `À vous : ${dialogue.character}`;
@@ -871,7 +871,8 @@
                 }, waitTime);
             } else {
                 waitIndicator.classList.remove("visible");
-                statusBar.textContent = `En cours : ${dialogue.character}`;
+                statusBar.textContent = isMuted ? `À vous : ${dialogue.character}` : `En cours : ${dialogue.character}`;
+                if (isMuted) playBeep();
                 audioPlayer.src = dialogue.audio;
                 audioPlayer.play().catch(e => {
                     console.error("Audio play error:", e);
