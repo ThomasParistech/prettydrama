@@ -600,6 +600,9 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             </div>
             <div class="status-bar" id="status-bar">Prêt</div>
             <div class="control-buttons">
+                <button class="control-btn" id="beginning-btn" aria-label="Beginning">
+                    <svg viewBox="0 0 24 24"><path d="M4 6h2v12H4zM8 12l6 4.5V7.5zM14 12l6 4.5V7.5z"/></svg>
+                </button>
                 <button class="control-btn" id="prev-btn" aria-label="Previous">
                     <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                 </button>
@@ -608,6 +611,9 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 </button>
                 <button class="control-btn" id="next-btn" aria-label="Next">
                     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+                <button class="control-btn" id="end-btn" aria-label="End">
+                    <svg viewBox="0 0 24 24"><path d="M18 6h2v12h-2zM4 7.5v9L10 12zM10 7.5v9L16 12z"/></svg>
                 </button>
             </div>
         </div>
@@ -637,6 +643,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         const playBtn = document.getElementById("play-btn");
         const prevBtn = document.getElementById("prev-btn");
         const nextBtn = document.getElementById("next-btn");
+        const beginningBtn = document.getElementById("beginning-btn");
+        const endBtn = document.getElementById("end-btn");
         const progressFill = document.getElementById("progress-fill");
         const statusBar = document.getElementById("status-bar");
         const waitIndicator = document.getElementById("wait-indicator");
@@ -704,6 +712,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             playBtn.addEventListener("click", togglePlay);
             prevBtn.addEventListener("click", prevDialogue);
             nextBtn.addEventListener("click", nextDialogue);
+            beginningBtn.addEventListener("click", goToBeginning);
+            endBtn.addEventListener("click", goToEnd);
 
             // Progress bar drag to seek (handles both click and drag)
             const progressContainer = document.getElementById("progress-container");
@@ -927,6 +937,25 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             } else {
                 playCurrentDialogue();
             }
+        }
+
+        function goToBeginning() {
+            currentDialogueIndex = 0;
+            waitIndicator.classList.remove("visible");
+            highlightCurrent();
+            updateProgress();
+            if (isPlaying) playCurrentDialogue();
+            else updateStatus();
+        }
+
+        function goToEnd() {
+            const scene = getCurrentScene();
+            currentDialogueIndex = scene.dialogues.length - 1;
+            waitIndicator.classList.remove("visible");
+            highlightCurrent();
+            updateProgress();
+            if (isPlaying) playCurrentDialogue();
+            else updateStatus();
         }
 
         function prevDialogue() {
