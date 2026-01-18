@@ -490,6 +490,39 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             color: white;
         }
 
+        .my-line-btn {
+            display: none;
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+            color: var(--accent-dark);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .my-line-btn.visible {
+            display: flex;
+        }
+
+        .my-line-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .my-line-btn:active {
+            transform: scale(0.96);
+        }
+
+        .my-line-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
         .loop-indicator {
             display: none;
         }
@@ -600,8 +633,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             </div>
             <div class="status-bar" id="status-bar">Prêt</div>
             <div class="control-buttons">
-                <button class="control-btn" id="beginning-btn" aria-label="Beginning">
-                    <svg viewBox="0 0 24 24"><path d="M4 6h2v12H4zM8 12l6 4.5V7.5zM14 12l6 4.5V7.5z"/></svg>
+                <button class="my-line-btn" id="prev-my-line-btn" aria-label="Previous my line">
+                    <svg viewBox="0 0 24 24"><path d="M8.5 12L17 6v12z"/></svg>
                 </button>
                 <button class="control-btn" id="prev-btn" aria-label="Previous">
                     <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
@@ -612,8 +645,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 <button class="control-btn" id="next-btn" aria-label="Next">
                     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </button>
-                <button class="control-btn" id="end-btn" aria-label="End">
-                    <svg viewBox="0 0 24 24"><path d="M18 6h2v12h-2zM4 7.5v9L10 12zM10 7.5v9L16 12z"/></svg>
+                <button class="my-line-btn" id="next-my-line-btn" aria-label="Next my line">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 12L7 18V6z"/></svg>
                 </button>
             </div>
         </div>
@@ -643,11 +676,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         const playBtn = document.getElementById("play-btn");
         const prevBtn = document.getElementById("prev-btn");
         const nextBtn = document.getElementById("next-btn");
-        const beginningBtn = document.getElementById("beginning-btn");
-        const endBtn = document.getElementById("end-btn");
         const progressFill = document.getElementById("progress-fill");
         const statusBar = document.getElementById("status-bar");
         const waitIndicator = document.getElementById("wait-indicator");
+        const prevMyLineBtn = document.getElementById("prev-my-line-btn");
+        const nextMyLineBtn = document.getElementById("next-my-line-btn");
 
         function init() {
             // Set title
@@ -694,6 +727,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
             characterSelect.addEventListener("change", () => {
                 rehearseCharacter = characterSelect.value;
+                prevMyLineBtn.classList.toggle("visible", rehearseCharacter !== "");
+                nextMyLineBtn.classList.toggle("visible", rehearseCharacter !== "");
                 renderScene();
             });
 
@@ -712,8 +747,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             playBtn.addEventListener("click", togglePlay);
             prevBtn.addEventListener("click", prevDialogue);
             nextBtn.addEventListener("click", nextDialogue);
-            beginningBtn.addEventListener("click", goToBeginning);
-            endBtn.addEventListener("click", goToEnd);
+            prevMyLineBtn.addEventListener("click", goToPrevMyLine);
+            nextMyLineBtn.addEventListener("click", goToNextMyLine);
 
             // Progress bar drag to seek (handles both click and drag)
             const progressContainer = document.getElementById("progress-container");
@@ -801,6 +836,16 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             const scene = getCurrentScene();
             dialogueContainer.innerHTML = "";
 
+            // Count user's lines for numbering
+            let userLineCount = 0;
+            const userLineIndices = [];
+            scene.dialogues.forEach((d, i) => {
+                if (d.character.toLowerCase() === rehearseCharacter.toLowerCase()) {
+                    userLineIndices.push(i);
+                }
+            });
+
+            let userLineNumber = 0;
             scene.dialogues.forEach((d, i) => {
                 const card = document.createElement("div");
                 card.className = "dialogue-card";
@@ -808,17 +853,18 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 
                 const isMuted = d.character.toLowerCase() === rehearseCharacter.toLowerCase();
                 if (isMuted) {
+                    userLineNumber++;
                     card.classList.add("muted");
                     if (hideRehearsalText) card.classList.add("hide-text");
                 }
 
                 const charEl = document.createElement("div");
                 charEl.className = "character-name";
-                charEl.textContent = d.character;
+                charEl.textContent = isMuted ? `${d.character} (${userLineNumber}/${userLineIndices.length})` : d.character;
 
                 const textEl = document.createElement("div");
                 textEl.className = "dialogue-text";
-                textEl.textContent = isMuted ? d.text : d.text;
+                textEl.textContent = d.text;
 
                 card.appendChild(charEl);
                 card.appendChild(textEl);
@@ -940,23 +986,43 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             }
         }
 
-        function goToBeginning() {
-            currentDialogueIndex = 0;
-            waitIndicator.classList.remove("visible");
-            highlightCurrent();
-            updateProgress();
-            if (isPlaying) playCurrentDialogue();
-            else updateStatus();
+        function getMyLineIndices() {
+            const scene = getCurrentScene();
+            const indices = [];
+            scene.dialogues.forEach((d, i) => {
+                if (d.character.toLowerCase() === rehearseCharacter.toLowerCase()) {
+                    indices.push(i);
+                }
+            });
+            return indices;
         }
 
-        function goToEnd() {
-            const scene = getCurrentScene();
-            currentDialogueIndex = scene.dialogues.length - 1;
-            waitIndicator.classList.remove("visible");
-            highlightCurrent();
-            updateProgress();
-            if (isPlaying) playCurrentDialogue();
-            else updateStatus();
+        function goToPrevMyLine() {
+            const indices = getMyLineIndices();
+            if (indices.length === 0) return;
+            const prevIndex = indices.filter(i => i < currentDialogueIndex).pop();
+            if (prevIndex !== undefined) {
+                currentDialogueIndex = prevIndex;
+                waitIndicator.classList.remove("visible");
+                highlightCurrent();
+                updateProgress();
+                if (isPlaying) playCurrentDialogue();
+                else updateStatus();
+            }
+        }
+
+        function goToNextMyLine() {
+            const indices = getMyLineIndices();
+            if (indices.length === 0) return;
+            const nextIndex = indices.find(i => i > currentDialogueIndex);
+            if (nextIndex !== undefined) {
+                currentDialogueIndex = nextIndex;
+                waitIndicator.classList.remove("visible");
+                highlightCurrent();
+                updateProgress();
+                if (isPlaying) playCurrentDialogue();
+                else updateStatus();
+            }
         }
 
         function prevDialogue() {
